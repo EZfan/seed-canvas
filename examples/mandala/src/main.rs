@@ -48,6 +48,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         params,
         adapter: kind,
         format,
+        size_override: None,
     };
 
     let output = render(&template, &request, &registry)?;

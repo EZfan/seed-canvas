@@ -123,6 +123,53 @@ enum Command {
         #[arg(long, default_value = ".")]
         root: PathBuf,
     },
+
+    /// Export a self-contained HTML page (artwork bytes embedded as
+    /// data: URLs) that renders identically offline.
+    Export {
+        /// Template identifier (required unless --all).
+        #[arg(short, long)]
+        template: Option<String>,
+        /// Deterministic seed (required unless --all).
+        #[arg(short, long)]
+        seed: Option<String>,
+        /// Output HTML file path.
+        #[arg(short, long, default_value = "artwork.html")]
+        out: PathBuf,
+        /// JSON-encoded params.
+        #[arg(long, default_value = "{}")]
+        params: String,
+        /// Export every stored artwork in the workspace gallery as one
+        /// grid page instead of a single artwork.
+        #[arg(long)]
+        all: bool,
+        /// Title for --all gallery pages.
+        #[arg(long, default_value = "My Gallery")]
+        title: String,
+        /// Workspace root used with --all.
+        #[arg(long, default_value = ".")]
+        root: PathBuf,
+    },
+
+    /// Print an <iframe> snippet that embeds a live artwork from a
+    /// running `seed-canvas serve` instance.
+    Embed {
+        /// Template identifier.
+        #[arg(short, long)]
+        template: String,
+        /// Deterministic seed.
+        #[arg(short, long)]
+        seed: String,
+        /// Base URL of the running gallery server.
+        #[arg(long, default_value = "http://127.0.0.1:8080")]
+        host: String,
+        /// iframe width in CSS pixels.
+        #[arg(long, default_value_t = 512)]
+        width: u32,
+        /// iframe height in CSS pixels.
+        #[arg(long, default_value_t = 512)]
+        height: u32,
+    },
 }
 
 #[derive(Copy, Clone, Debug, ValueEnum)]
@@ -206,7 +253,118 @@ fn main() -> Result<()> {
             Ok(())
         }
         Command::Serve { addr, root } => serve_cmd(addr, root),
+        Command::Export {
+            template,
+            seed,
+            out,
+            params,
+            all,
+            title,
+            root,
+        } => match (all, template, seed) {
+            (true, _, _) => export_all_cmd(&title, &root, &out),
+            (false, Some(template), Some(seed)) => {
+                export_cmd(&registry, &template, &seed, &out, &params)
+            }
+            (false, _, _) => bail!("--template and --seed are required unless --all is set"),
+        },
+        Command::Embed {
+            template,
+            seed,
+            host,
+            width,
+            height,
+        } => {
+            print!(
+                "{}",
+                seed_canvas_embed::iframe_snippet(&host, &template, &seed, width, height)
+            );
+            Ok(())
+        }
     }
+}
+
+/// Export a single artwork as a self-contained HTML page.
+fn export_cmd(
+    registry: &AdapterRegistry,
+    template_id: &str,
+    seed_str: &str,
+    out: &Path,
+    params_json: &str,
+) -> Result<()> {
+    let template = resolve_template(template_id)?;
+    let params: serde_json::Value =
+        serde_json::from_str(params_json).context("--params must be valid JSON")?;
+    let request = RenderRequest {
+        seed: Seed::from_string(seed_str),
+        params,
+        adapter: AdapterKind::Server,
+        format: OutputFormat::Png,
+        size_override: None,
+    };
+    let output = render(&template, &request, registry)?;
+    let html = seed_canvas_embed::artwork_page(
+        template_id,
+        &template.manifest().name,
+        seed_str,
+        &output.bytes,
+        "image/png",
+    )?;
+    write_atomically(out, html.as_bytes())?;
+    eprintln!(
+        "✓ wrote {} ({} bytes html, artwork sha256 {}…)",
+        out.display(),
+        html.len(),
+        &output.content_hash[..16]
+    );
+    Ok(())
+}
+
+/// Export every stored artwork in the workspace gallery as one grid page.
+fn export_all_cmd(title: &str, root: &Path, out: &Path) -> Result<()> {
+    let gallery = seed_canvas_storage::Gallery::open(root)
+        .with_context(|| format!("failed to open gallery at {}", root.display()))?;
+    let rows = gallery.list_artworks(i64::MAX)?;
+    if rows.is_empty() {
+        bail!(
+            "gallery at {} has no artworks; render some first with `seed-canvas render`",
+            root.display()
+        );
+    }
+    let registry = build_registry();
+    // Render everything first and keep the bytes alive; GalleryItem
+    // borrows from these, so both vectors must outlive `html`.
+    let mut rendered = Vec::with_capacity(rows.len());
+    for art in &rows {
+        let template = resolve_template(&art.template_id)?;
+        let request = RenderRequest {
+            seed: Seed::from_string(&art.seed_raw),
+            params: art.params.clone(),
+            adapter: AdapterKind::Server,
+            format: OutputFormat::Png,
+            size_override: None,
+        };
+        rendered.push(render(&template, &request, &registry)?);
+    }
+    let items: Vec<seed_canvas_embed::GalleryItem<'_>> = rows
+        .iter()
+        .zip(&rendered)
+        .map(|(art, output)| seed_canvas_embed::GalleryItem {
+            template_id: &art.template_id,
+            seed: &art.seed_raw,
+            bytes: &output.bytes,
+            mime: "image/png",
+        })
+        .collect();
+    let html = seed_canvas_embed::gallery_page(title, &items)?;
+    write_atomically(out, html.as_bytes())?;
+    eprintln!(
+        "✓ wrote {} ({} artworks, {} bytes html)",
+        out.display(),
+        items.len(),
+        html.len()
+    );
+    Ok(())
 }
 
 /// Run the self-hosted gallery server. Blocks until the process is killed.
@@ -255,12 +413,17 @@ fn build_registry() -> AdapterRegistry {
 fn resolve_template(id: &str) -> Result<seed_canvas_core::template::Template> {
     match id {
         "galaxy" => Ok(galaxy::build()),
+        "particles" => Ok(particles::build()),
+        "mandala" => Ok(mandala::build()),
         other => Err(anyhow!(
             "unknown template {:?}; run `seed-canvas list` to see installed templates",
             other
         )),
     }
 }
+
+/// All built-in template ids, in display order.
+const BUILTIN_TEMPLATES: &[&str] = &["galaxy", "particles", "mandala"];
 
 fn parse_params(raw: &str) -> Result<serde_json::Value> {
     serde_json::from_str(raw).with_context(|| format!("--params must be valid JSON, got {raw:?}"))
@@ -282,6 +445,7 @@ fn render_cmd(
         params,
         adapter,
         format,
+        size_override: None,
     };
     let output = render(&template, &request, registry)?;
     write_atomically(out, &output.bytes)?;
@@ -326,16 +490,17 @@ fn share_cmd(
 fn list_cmd() -> Result<()> {
     let registry = build_registry();
     println!("Installed templates:");
-    let template_id = "galaxy";
-    let template = resolve_template(template_id)?;
-    let m = template.manifest();
-    println!(
-        "  • {id} ({name}, v{version}) — {desc}",
-        id = m.id,
-        name = m.name,
-        version = m.version,
-        desc = m.description,
-    );
+    for template_id in BUILTIN_TEMPLATES {
+        let template = resolve_template(template_id)?;
+        let m = template.manifest();
+        println!(
+            "  • {id} ({name}, v{version}) — {desc}",
+            id = m.id,
+            name = m.name,
+            version = m.version,
+            desc = m.description,
+        );
+    }
     println!("\nRegistered adapters:");
     for kind in registry.kinds() {
         println!("  • {kind:?}");
@@ -362,6 +527,7 @@ fn verify_cmd(
         params,
         adapter: AdapterKind::Server,
         format: OutputFormat::Json,
+        size_override: None,
     };
     let output = render(&template, &request, registry)?;
 
@@ -414,14 +580,15 @@ fn doctor_cmd(registry: &AdapterRegistry) -> Result<()> {
     }
 
     println!("\n• built-in templates");
-    let id = "galaxy";
-    let template = resolve_template(id)?;
-    println!(
-        "    {id}  v{version} ({width}x{height})",
-        version = template.manifest().version,
-        width = template.manifest().canvas.width,
-        height = template.manifest().canvas.height,
-    );
+    for id in BUILTIN_TEMPLATES {
+        let template = resolve_template(id)?;
+        println!(
+            "    {id}  v{version} ({width}x{height})",
+            version = template.manifest().version,
+            width = template.manifest().canvas.width,
+            height = template.manifest().canvas.height,
+        );
+    }
 
     Ok(())
 }

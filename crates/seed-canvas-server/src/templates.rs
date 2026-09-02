@@ -18,6 +18,7 @@ const SHELL: &str = r#"<!DOCTYPE html>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="generator" content="seed-canvas">
 <title>{title} · seed-canvas</title>
+{head_extra}
 <link rel="stylesheet" href="/static/style.css">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><circle cx='8' cy='8' r='6' fill='%2376e4f7'/></svg>">
 </head>
@@ -44,9 +45,15 @@ const SHELL: &str = r#"<!DOCTYPE html>
 "#;
 
 fn shell(title: &str, body: &str) -> String {
+    shell_with_head(title, body, "")
+}
+
+/// Like [`shell`] but injects raw HTML into `<head>` (used for OG tags).
+fn shell_with_head(title: &str, body: &str, head_extra: &str) -> String {
     let now = chrono::Utc::now().to_rfc3339();
     SHELL
         .replace("{title}", &html_escape(title))
+        .replace("{head_extra}", head_extra)
         .replace("{body}", body)
         .replace("{generated_at}", &now)
 }
@@ -201,7 +208,21 @@ pub fn artwork_page(
         n = artworks.len(),
         canonical = canonical_url,
     );
-    shell(&format!("{} · {}", manifest.name, seed), &body)
+    // Open Graph tags so link previews (Slack, X/Twitter, iMessage, …)
+    // show the artwork itself via the /og share image.
+    let og_image_url = format!("/og/{}/{}", manifest.id, seed);
+    let og = format!(
+        r#"<meta property="og:type" content="website">
+<meta property="og:title" content="{name} / {seed} — seed-canvas">
+<meta property="og:description" content="Deterministic artwork {tid}/{seed}. Same seed, same image, every platform.">
+<meta property="og:image" content="{img}">
+<meta name="twitter:card" content="summary_large_image">"#,
+        name = html_escape(&manifest.name),
+        tid = manifest.id,
+        seed = html_escape(seed),
+        img = og_image_url,
+    );
+    shell_with_head(&format!("{} · {}", manifest.name, seed), &body, &og)
 }
 
 /// `GET /embed/:template/:seed` — minimal iframe-friendly page.

@@ -74,13 +74,13 @@ pub struct ServerSurface {
 }
 
 impl ServerSurface {
-    /// Allocate a fresh pixmap sized to the request.
-    fn new(_request: &RenderRequest) -> Self {
-        // We will eventually derive canvas dimensions from the request's
-        // seed bytes (so a 1024×1024 canvas can become 1920×1080 for a
-        // "wide-screen" seed). Today we always render 1024×1024.
-        let (w, h) = (1024u32, 1024u32);
-        let pixmap = Pixmap::new(w, h).expect("1024x1024 pixmap allocation");
+    /// Allocate a fresh pixmap sized to the request. Honors
+    /// `request.size_override` (OG images, thumbnails), falling back to
+    /// the 1024×1024 default.
+    fn new(request: &RenderRequest) -> Self {
+        let (w, h) = request.size_override.unwrap_or((1024, 1024));
+        let pixmap =
+            Pixmap::new(w, h).unwrap_or_else(|| panic!("pixmap allocation {w}x{h} failed"));
         Self { pixmap }
     }
 

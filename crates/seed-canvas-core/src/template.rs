@@ -193,11 +193,34 @@ impl Template {
         params: &Params,
         surface: &mut dyn Surface,
     ) -> Result<(), TemplateError> {
+        self.render_with_canvas(seed, params, surface, self.manifest.canvas)
+    }
+
+    /// The template's default canvas size.
+    #[must_use]
+    pub const fn canvas_dimensions(&self) -> CanvasSize {
+        self.manifest.canvas
+    }
+
+    /// Like [`Self::render`] but with an explicit canvas size. The
+    /// template must scale its geometry from `ctx.canvas`. Used for OG
+    /// images, thumbnails, and other size-overridden renders.
+    ///
+    /// # Errors
+    ///
+    /// Returns the error produced by the entry function.
+    pub fn render_with_canvas(
+        &self,
+        seed: &mut Seed,
+        params: &Params,
+        surface: &mut dyn Surface,
+        canvas: CanvasSize,
+    ) -> Result<(), TemplateError> {
         let mut ctx = RenderContext {
             seed,
             params,
             surface,
-            canvas: self.manifest.canvas,
+            canvas,
         };
         (self.entry)(&mut ctx)
     }

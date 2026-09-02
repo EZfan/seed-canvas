@@ -17,6 +17,8 @@ seed-canvas-adapter-server = { workspace = true }
 seed-canvas-adapter-svg = { workspace = true }
 seed-canvas-storage = { workspace = true }
 galaxy = { workspace = true }
+particles = { workspace = true }
+mandala = { workspace = true }
 axum = { workspace = true }
 tokio = { workspace = true }
 tower = { workspace = true }

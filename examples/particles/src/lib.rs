@@ -178,6 +178,7 @@ mod tests {
             params: serde_json::json!({"count": 100, "trail_length": 5}),
             adapter: AdapterKind::Svg,
             format: OutputFormat::Json,
+            size_override: None,
         };
 
         let a = render(&template, &req(), &registry).unwrap();

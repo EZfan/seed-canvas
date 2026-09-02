@@ -12,7 +12,7 @@
 use crate::adapter::{AdapterKind, AdapterRegistry};
 use crate::seed::Seed;
 use crate::surface::{OutputFormat, SurfaceError};
-use crate::template::{Template, TemplateError};
+use crate::template::{CanvasSize, Template, TemplateError};
 use thiserror::Error;
 
 /// A single render request — everything needed to produce one artwork.
@@ -28,6 +28,12 @@ pub struct RenderRequest {
     /// Desired output format. PNG for raster adapters, SVG for the SVG
     /// adapter, JSON for debugging.
     pub format: OutputFormat,
+    /// Optional canvas size override. When `Some((w, h))` the surface
+    /// and the template's `ctx.canvas` both use this size instead of the
+    /// template manifest's default. Used for OG images (1200×630),
+    /// thumbnails, and wallpapers. Templates must scale their geometry
+    /// from `ctx.canvas`, never hard-code dimensions.
+    pub size_override: Option<(u32, u32)>,
 }
 
 impl RenderRequest {
@@ -39,6 +45,7 @@ impl RenderRequest {
             params: serde_json::Value::Object(Default::default()),
             adapter,
             format,
+            size_override: None,
         }
     }
 
@@ -46,6 +53,13 @@ impl RenderRequest {
     #[must_use]
     pub fn with_params(mut self, params: serde_json::Value) -> Self {
         self.params = params;
+        self
+    }
+
+    /// Set the canvas size override.
+    #[must_use]
+    pub const fn with_size(mut self, width: u32, height: u32) -> Self {
+        self.size_override = Some((width, height));
         self
     }
 }
@@ -98,13 +112,21 @@ pub fn render(
 ) -> Result<RenderOutput, RenderError> {
     // 1. Validate params.
     let params = template.validate_params(request.params.clone())?;
+    let default_canvas = template.canvas_dimensions();
+    let canvas = request
+        .size_override
+        .map(|(w, h)| CanvasSize {
+            width: w,
+            height: h,
+        })
+        .unwrap_or(default_canvas);
 
     // 2. Construct surface.
     let mut surface = registry.create_surface(request.adapter, request)?;
 
-    // 3. Run the template.
+    // 3. Run the template with the (possibly overridden) canvas.
     let mut seed = request.seed.clone();
-    template.render(&mut seed, &params, surface.as_mut())?;
+    template.render_with_canvas(&mut seed, &params, surface.as_mut(), canvas)?;
 
     // 4. Encode.
     let bytes = surface.encode(request.format)?;
@@ -204,6 +226,7 @@ mod tests {
             params: serde_json::json!({}),
             adapter: AdapterKind::Server,
             format: OutputFormat::Json,
+            size_override: None,
         };
 
         let a = render(&template, &req, &registry).unwrap();
@@ -223,12 +246,14 @@ mod tests {
             params: serde_json::json!({}),
             adapter: AdapterKind::Server,
             format: OutputFormat::Json,
+            size_override: None,
         };
         let req_b = RenderRequest {
             seed: Seed::from_string("b"),
             params: serde_json::json!({}),
             adapter: AdapterKind::Server,
             format: OutputFormat::Json,
+            size_override: None,
         };
 
         let a = render(&template, &req_a, &registry).unwrap();

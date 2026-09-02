@@ -30,6 +30,8 @@ pub fn router(state: Arc<ServerState>) -> Router {
         .route("/art/:template/:rest", get(handlers::artwork_bytes))
         // Embeddable widget
         .route("/embed/:template/:seed", get(handlers::embed_widget))
+        // Open Graph share image — 1200×630 PNG via size_override.
+        .route("/og/:template/:seed", get(handlers::og_image))
         // Static assets (CSS / JS)
         .route("/static/style.css", get(handlers::style_css))
         .route("/static/app.js", get(handlers::app_js))
