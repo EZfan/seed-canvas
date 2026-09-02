@@ -155,6 +155,52 @@ fn parse_format(s: &str) -> Result<(OutputFormat, AdapterKind), AppError> {
     }
 }
 
+/// Shared render pipeline used by every HTTP handler that produces
+/// artwork bytes. Returns encoded bytes + their SHA-256.
+///
+/// `size` overrides the canvas when provided; templates must scale
+/// their geometry from `ctx.canvas`.
+fn render_artwork(
+    state: &ServerState,
+    template: &crate::state::BoxedTemplate,
+    seed_str: &str,
+    params: &serde_json::Value,
+    format: OutputFormat,
+    adapter: AdapterKind,
+    size: Option<(u32, u32)>,
+) -> Result<(Vec<u8>, String), AppError> {
+    let seed = Seed::from_string(seed_str);
+    let request = seed_canvas_core::render::RenderRequest {
+        seed: seed.clone(),
+        params: params.clone(),
+        adapter,
+        format,
+        size_override: size,
+    };
+    let mut surface = state
+        .registry
+        .create_surface(adapter, &request)
+        .map_err(|e| AppError::Render(format!("{e}")))?;
+    let validated = template
+        .validate(params.clone())
+        .map_err(|e| AppError::Render(format!("{e}")))?;
+    let canvas = size
+        .map(|(w, h)| seed_canvas_core::template::CanvasSize {
+            width: w,
+            height: h,
+        })
+        .unwrap_or_else(|| template.manifest().canvas);
+    let mut seed_stream = seed;
+    template
+        .render_into(&mut seed_stream, &validated, surface.as_mut(), canvas)
+        .map_err(|e| AppError::Render(format!("{e}")))?;
+    let bytes = surface
+        .encode(format)
+        .map_err(|e| AppError::Render(format!("{e}")))?;
+    let hash = sha256_hex(&bytes);
+    Ok((bytes, hash))
+}
+
 /// `POST /api/render` — render an artwork and return its content hash + URL.
 pub async fn api_render(
     State(state): State<Arc<ServerState>>,
@@ -169,38 +215,15 @@ pub async fn api_render(
         .clone()
         .unwrap_or_else(|| serde_json::json!({}));
 
-    // Construct the surface for the requested adapter.
-    let seed = Seed::from_string(&input.seed);
-    let request = seed_canvas_core::render::RenderRequest {
-        seed: seed.clone(),
-        params: params.clone(),
-        adapter,
+    let (bytes, content_hash) = render_artwork(
+        &state,
+        &template,
+        &input.seed,
+        &params,
         format,
-    };
-    let mut surface = state
-        .registry
-        .create_surface(adapter, &request)
-        .map_err(|e| AppError::Render(format!("{e}")))?;
-
-    // Validate params + run the template through the type-erased trait.
-    let mut seed_stream = seed;
-    let validated = template
-        .validate(params.clone())
-        .map_err(|e| AppError::Render(format!("{e}")))?;
-    template
-        .render_into(&mut seed_stream, &validated, surface.as_mut())
-        .map_err(|e| AppError::Render(format!("{e}")))?;
-    let bytes = surface
-        .encode(format)
-        .map_err(|e| AppError::Render(format!("{e}")))?;
-    let content_hash = sha256_hex(&bytes);
-
-    let output = seed_canvas_core::render::RenderOutput {
-        bytes,
-        content_hash,
         adapter,
-        format,
-    };
+        None,
+    )?;
 
     // Persist into the gallery.
     let handle = Seed::from_string(&input.seed).handle();
@@ -213,7 +236,7 @@ pub async fn api_render(
             seed_handle: &handle,
             params: &params,
             format: input.format.as_str(),
-            content_hash: &output.content_hash,
+            content_hash: &content_hash,
             file_path: std::path::Path::new(""),
             adapter: match adapter {
                 AdapterKind::Server => "server",
@@ -232,8 +255,8 @@ pub async fn api_render(
     let url = format!("/art/{}/{}.{}", input.template, input.seed, ext);
 
     Ok(axum::Json(serde_json::json!({
-        "content_hash": output.content_hash,
-        "bytes_len": output.bytes.len(),
+        "content_hash": content_hash,
+        "bytes_len": bytes.len(),
         "url": url,
         "template": input.template,
         "seed": input.seed,
@@ -296,27 +319,7 @@ pub async fn artwork_bytes(
     let (format, adapter) =
         parse_format(&ext).map_err(|_| AppError::Render(format!("unknown extension: {ext}")))?;
     let params = serde_json::json!({});
-    let seed = Seed::from_string(seed_str);
-    let request = seed_canvas_core::render::RenderRequest {
-        seed: seed.clone(),
-        params: params.clone(),
-        adapter,
-        format,
-    };
-    let mut surface = state
-        .registry
-        .create_surface(adapter, &request)
-        .map_err(|e| AppError::Render(format!("{e}")))?;
-    let mut seed_stream = seed;
-    let validated = template
-        .validate(params)
-        .map_err(|e| AppError::Render(format!("{e}")))?;
-    template
-        .render_into(&mut seed_stream, &validated, surface.as_mut())
-        .map_err(|e| AppError::Render(format!("{e}")))?;
-    let bytes = surface
-        .encode(format)
-        .map_err(|e| AppError::Render(format!("{e}")))?;
+    let (bytes, _) = render_artwork(&state, &template, seed_str, &params, format, adapter, None)?;
     let mime = match format {
         OutputFormat::Png => "image/png",
         OutputFormat::Svg => "image/svg+xml",
@@ -324,6 +327,40 @@ pub async fn artwork_bytes(
     };
     Ok((
         [(header::CONTENT_TYPE, HeaderValue::from_static(mime))],
+        bytes,
+    )
+        .into_response())
+}
+
+/// Width of the Open Graph share image in pixels.
+pub const OG_WIDTH: u32 = 1200;
+/// Height of the Open Graph share image in pixels.
+pub const OG_HEIGHT: u32 = 630;
+
+/// `GET /og/:template/:seed` — 1200×630 PNG for social link previews.
+///
+/// Rendered through the same deterministic pipeline as every other
+/// artwork, just with a widescreen `size_override`, so the share image
+/// is genuinely the artwork rather than a letterboxed screenshot.
+pub async fn og_image(
+    State(state): State<Arc<ServerState>>,
+    Path((template_id, seed)): Path<(String, String)>,
+) -> Result<Response, AppError> {
+    let template = state
+        .template(&template_id)
+        .ok_or_else(|| AppError::TemplateNotFound(template_id.clone()))?;
+    let params = serde_json::json!({});
+    let (bytes, _) = render_artwork(
+        &state,
+        &template,
+        &seed,
+        &params,
+        OutputFormat::Png,
+        AdapterKind::Server,
+        Some((OG_WIDTH, OG_HEIGHT)),
+    )?;
+    Ok((
+        [(header::CONTENT_TYPE, HeaderValue::from_static("image/png"))],
         bytes,
     )
         .into_response())

@@ -6,6 +6,7 @@ members = [
     "crates/seed-canvas-adapter-svg",
     "crates/seed-canvas-storage",
     "crates/seed-canvas-server",
+    "crates/seed-canvas-embed",
     "crates/seed-canvas-cli",
     "examples/galaxy",
     "examples/particles",
@@ -48,6 +49,7 @@ seed-canvas-adapter-server = { path = "crates/seed-canvas-adapter-server", versi
 seed-canvas-adapter-svg = { path = "crates/seed-canvas-adapter-svg", version = "0.1.0" }
 seed-canvas-storage = { path = "crates/seed-canvas-storage", version = "0.1.0" }
 seed-canvas-server = { path = "crates/seed-canvas-server", version = "0.1.0" }
+seed-canvas-embed = { path = "crates/seed-canvas-embed", version = "0.1.0" }
 seed-canvas-cli = { path = "crates/seed-canvas-cli", version = "0.1.0" }
 galaxy = { path = "examples/galaxy", version = "0.1.0" }
 particles = { path = "examples/particles", version = "0.1.0" }
@@ -83,6 +85,9 @@ tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt"] }
 sha2 = "0.10"
 hex = "0.4"
 blake3 = "1.5"
+
+# Base64 for self-contained HTML embeds
+base64 = "0.22"
 
 # Web framework
 axum = { version = "0.7", features = ["http1", "json", "query", "tokio", "multipart"] }

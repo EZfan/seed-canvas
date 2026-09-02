@@ -1,9 +1,18 @@
 [package]
 name = "seed-canvas-embed"
+description = "Self-contained HTML export and iframe embedding for seed-canvas artworks and galleries."
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
-publish = false
+repository.workspace = true
+homepage.workspace = true
+documentation.workspace = true
+keywords.workspace = true
+categories.workspace = true
 
 [dependencies]
+seed-canvas-core = { workspace = true }
+base64 = { workspace = true }
+chrono = { workspace = true }
+thiserror = { workspace = true }

@@ -1891,10 +1891,14 @@ dependencies = [
  "anyhow",
  "clap",
  "galaxy",
+ "mandala",
+ "particles",
  "seed-canvas-adapter-server",
  "seed-canvas-adapter-svg",
  "seed-canvas-core",
+ "seed-canvas-embed",
  "seed-canvas-server",
+ "seed-canvas-storage",
  "serde",
  "serde_json",
  "thiserror",
@@ -1925,6 +1929,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "seed-canvas-embed"
+version = "0.1.0"
+dependencies = [
+ "base64",
+ "chrono",
+ "seed-canvas-core",
+ "thiserror",
+]
+
+[[package]]
 name = "seed-canvas-server"
 version = "0.1.0"
 dependencies = [
@@ -1934,6 +1948,8 @@ dependencies = [
  "galaxy",
  "hex",
  "hyper",
+ "mandala",
+ "particles",
  "seed-canvas-adapter-server",
  "seed-canvas-adapter-svg",
  "seed-canvas-core",

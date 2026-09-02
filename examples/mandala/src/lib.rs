@@ -210,6 +210,7 @@ mod tests {
             params: serde_json::json!({"symmetry": 8, "rings": 3}),
             adapter: AdapterKind::Svg,
             format: OutputFormat::Json,
+            size_override: None,
         };
 
         let a = render(&template, &req(), &registry).unwrap();

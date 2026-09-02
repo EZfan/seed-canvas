@@ -7,7 +7,7 @@ use std::sync::Arc;
 
 use seed_canvas_core::adapter::{Adapter, AdapterRegistry};
 use seed_canvas_core::template::{
-    Params, RenderContext, Template, TemplateError, TemplateManifest,
+    CanvasSize, Params, RenderContext, Template, TemplateError, TemplateManifest,
 };
 use seed_canvas_core::Seed;
 use seed_canvas_storage::Gallery;
@@ -30,13 +30,16 @@ pub trait ErasedRender: Send + Sync {
     fn validate(&self, params: serde_json::Value) -> Result<Params, TemplateError>;
 
     /// Run the template's entry function with the supplied seed stream,
-    /// writing to `surface`. Assumes the caller has already validated
-    /// `params` via [`Self::validate`].
+    /// writing to `surface` sized `canvas`. The canvas may differ from
+    /// the manifest default (OG images, thumbnails); templates must
+    /// scale geometry from `ctx.canvas`. Assumes the caller has already
+    /// validated `params` via [`Self::validate`].
     fn render_into(
         &self,
         seed: &mut Seed,
         params: &Params,
         surface: &mut dyn seed_canvas_core::Surface,
+        canvas: CanvasSize,
     ) -> Result<(), TemplateError>;
 }
 
@@ -56,8 +59,9 @@ impl ErasedRender for Template {
         seed: &mut Seed,
         params: &Params,
         surface: &mut dyn seed_canvas_core::Surface,
+        canvas: CanvasSize,
     ) -> Result<(), TemplateError> {
-        Template::render(self, seed, params, surface)
+        Template::render_with_canvas(self, seed, params, surface, canvas)
     }
 }
 
@@ -86,7 +90,11 @@ impl ServerState {
             Arc::new(seed_canvas_adapter_server::ServerAdapter::new()) as Arc<dyn Adapter>
         );
         registry.register(Arc::new(seed_canvas_adapter_svg::SvgAdapter::new()) as Arc<dyn Adapter>);
-        let templates: Vec<BoxedTemplate> = vec![Arc::new(galaxy::build())];
+        let templates: Vec<BoxedTemplate> = vec![
+            Arc::new(galaxy::build()),
+            Arc::new(particles::build()),
+            Arc::new(mandala::build()),
+        ];
         Self {
             gallery: Arc::new(gallery),
             registry: Arc::new(registry),
