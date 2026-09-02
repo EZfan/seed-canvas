@@ -103,10 +103,9 @@ pub enum RenderError {
 ///
 /// # Errors
 ///
-/// Any of [`TemplateError`](crate::template::TemplateError),
-/// [`AdapterError`](crate::adapter::AdapterError), or
-/// [`SurfaceError`](crate::surface::SurfaceError) may surface; they are
-/// wrapped in [`RenderError`] for ergonomic callers.
+/// Any of [`TemplateError`], [`AdapterError`](crate::adapter::AdapterError),
+/// or [`SurfaceError`] may surface; they are wrapped in [`RenderError`]
+/// for ergonomic callers.
 pub fn render(
     template: &Template,
     request: &RenderRequest,
