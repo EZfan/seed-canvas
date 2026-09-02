@@ -59,8 +59,10 @@ representative at an online or offline event.
 ## Enforcement
 
 Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported to the community leaders responsible for enforcement at
-**[email protected]**. All complaints will be reviewed and investigated promptly
+reported to the maintainers via a private GitHub security advisory or by
+opening a private contact through the repository's
+[Issues page](https://github.com/EZfan/seed-canvas/issues) (mentioning
+`@EZfan`). All complaints will be reviewed and investigated promptly
 and fairly.
 
 All community leaders are obligated to respect the privacy and security of the

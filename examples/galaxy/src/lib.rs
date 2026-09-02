@@ -191,7 +191,7 @@ pub fn manifest() -> TemplateManifest {
             "Deterministic particle nebula with a glowing core and configurable star count.".into(),
         authors: vec![Author {
             name: "seed-canvas contributors".into(),
-            url: Some("https://github.com/seed-canvas/seed-canvas".into()),
+            url: Some("https://github.com/EZfan/seed-canvas".into()),
             email: None,
         }],
         license: "MIT".into(),

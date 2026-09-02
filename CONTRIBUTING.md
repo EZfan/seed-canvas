@@ -31,7 +31,7 @@ By participating, you agree to abide by the
 ### Clone and Install
 
 ```bash
-git clone https://github.com/seed-canvas/seed-canvas.git
+git clone https://github.com/EZfan/seed-canvas.git
 cd seed-canvas
 pnpm install
 ```

@@ -14,9 +14,11 @@ receives security patches; older versions do not.
 
 **Please do not file public issues for security problems.**
 
-Report vulnerabilities privately by emailing **[email protected]**.
-You should receive an acknowledgement within 72 hours. We will follow up with a
-detailed response and a coordinated disclosure timeline.
+Report vulnerabilities privately via
+[GitHub's private security advisory](https://github.com/EZfan/seed-canvas/security/advisories/new)
+for this repository. You should receive an acknowledgement within 72
+hours. We will follow up with a detailed response and a coordinated
+disclosure timeline.
 
 Please include:
 

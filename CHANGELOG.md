@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - GitHub Actions CI: lint, typecheck, test, and golden-image diff across Ubuntu/macOS/Windows.
 
 ### Notes
-- This is the M1 milestone release. Web UI, registry, embed, and editor land in M2-M5.
+- This is the initial development release. The gallery server,
+  template registry, and HTML export land in subsequent 0.x releases.
 
-[Unreleased]: https://github.com/seed-canvas/seed-canvas/compare/v0.0.0...HEAD
+[Unreleased]: https://github.com/EZfan/seed-canvas/compare/v0.1.0...HEAD

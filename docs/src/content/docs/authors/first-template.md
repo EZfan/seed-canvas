@@ -23,7 +23,6 @@ use seed_canvas_core::template::{
 };
 
 fn manifest() -> TemplateManifest {
-    serde_json::json!({}); // placeholder to keep the example compilable
     TemplateManifest {
         id: "rings".into(),
         name: "Rings".into(),

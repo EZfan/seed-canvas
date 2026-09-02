@@ -6,11 +6,10 @@
 
 Open-source, self-hostable, deterministic generative-art platform — built in Rust.
 
-[![CI](https://github.com/seed-canvas/seed-canvas/actions/workflows/ci.yml/badge.svg)](https://github.com/seed-canvas/seed-canvas/actions/workflows/ci.yml)
-[![crates.io](https://img.shields.io/crates/v/seed-canvas-cli)](https://crates.io/crates/seed-canvas-cli)
+[![CI](https://github.com/EZfan/seed-canvas/actions/workflows/ci.yml/badge.svg)](https://github.com/EZfan/seed-canvas/actions/workflows/ci.yml)
+[![Docs](https://github.com/EZfan/seed-canvas/actions/workflows/docs.yml/badge.svg)](https://ezfan.github.io/seed-canvas/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 [![MSRV 1.80](https://img.shields.io/badge/MSRV-1.80-blueviolet.svg)](https://blog.rust-lang.org/2024/07/25/Rust-1.80.0.html)
-[![codecov](https://codecov.io/gh/seed-canvas/seed-canvas/graph/badge.svg)](https://codecov.io/gh/seed-canvas/seed-canvas)
 
 ![seed-canvas hero artwork](assets/artworks/galaxy-cosmos.png)
 
@@ -103,11 +102,11 @@ seed-canvas/
 │   ├── seed-canvas-adapter-svg/     # Declarative SVG adapter
 │   ├── seed-canvas-storage/         # SQLite + FTS5 + r2d2
 │   ├── seed-canvas-cli/             # The `seed-canvas` binary
-│   └── seed-canvas-server/          # (M2) axum gallery server
+│   └── seed-canvas-server/          # axum gallery server
 ├── examples/
 │   └── galaxy/                      # Official particle nebula template
-├── registry/                        # (M3) Template marketplace index
-├── docs/                            # (M2) Starlight documentation site
+├── registry/                        # Template registry index
+├── docs/                            # Starlight documentation site
 ├── docker/                          # Multi-arch Docker image
 ├── .github/                         # CI workflows + issue / PR templates
 └── assets/                          # README hero, sample artworks
@@ -134,7 +133,7 @@ seed-canvas/
                               ▼
         ┌───────────┬────────────┬────────────┐
         │  server   │    svg     │  canvas2d  │   ◄ adapters
-        │ tiny-skia │   direct   │  (M2 web)  │
+        │ tiny-skia │   direct   │  (browser) │
         └─────┬─────┴──────┬─────┴─────┬──────┘
               │ PNG bytes  │ SVG bytes │ JSON dump
               ▼            ▼           ▼
@@ -168,7 +167,7 @@ docker run --rm -v "$PWD:/out" seedcanvas/seed-canvas \
 ### From source
 
 ```bash
-git clone https://github.com/seed-canvas/seed-canvas
+git clone https://github.com/EZfan/seed-canvas
 cd seed-canvas
 cargo install --path crates/seed-canvas-cli
 ```
@@ -234,17 +233,19 @@ seed-canvas doctor
 
 | Adapter  | Backend                | Output formats        | Status        |
 | -------- | ---------------------- | --------------------- | ------------- |
-| `server` | `tiny-skia` (CPU)      | `png`, `json`         | M1 — shipped  |
-| `svg`    | Direct element writer  | `svg`, `json`         | M1 — shipped  |
-| `canvas2d` | Browser 2D canvas    | (browser)             | M2            |
-| `webgl`  | WebGL 2                | (browser)             | M3            |
-| `webgpu` | WebGPU                 | (browser)             | M4            |
+| `server` | `tiny-skia` (CPU)      | `png`, `json`         | ✅ shipped    |
+| `svg`    | Direct element writer  | `svg`, `json`         | ✅ shipped    |
+| `canvas2d` | Browser 2D canvas    | (browser)             | 🗺 planned     |
+| `webgl`  | WebGL 2                | (browser)             | 🗺 planned     |
+| `webgpu` | WebGPU                 | (browser)             | 🗺 planned     |
 
 ## Stability
 
-This is **M1 / pre-1.0**. The format of seed bytes, JSON parameter
-schemas, and storage tables may change before 1.0. Every 0.x release is
-tagged on crates.io and announced via the project's GitHub Releases.
+This is **pre-1.0** software. The seed-byte derivation, JSON parameter
+schemas, and storage schema may still change before 1.0 — breaking
+changes are flagged in the [CHANGELOG](./CHANGELOG.md). The seed
+derivation itself is domain-tagged (`seed-canvas/v1`), so historical
+seeds keep rendering identically even if the scheme is revised.
 
 ## Contributing
 
