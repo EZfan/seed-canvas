@@ -1,8 +1,12 @@
 name: release
 
+# Manual trigger only. Enabling this on push requires release-plz to be
+# configured with a token that can create release PRs (the default
+# GITHUB_TOKEN works for PR creation, but crates.io publishing needs a
+# CARGO_REGISTRY_TOKEN secret). Turn on push triggers once that setup
+# is complete, otherwise every push fails on a half-configured pipeline.
 on:
-  push:
-    branches: [main]
+  workflow_dispatch:
 
 permissions:
   contents: write

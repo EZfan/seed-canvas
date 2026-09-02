@@ -47,7 +47,9 @@ impl Seed {
     ///
     /// # Errors
     ///
-    /// Returns [`SeedError::Empty`] if `raw` is empty after trimming.
+    /// # Panics
+    ///
+    /// Panics if `raw` is empty after trimming.
     pub fn from_string(raw: impl Into<String>) -> Self {
         Self::from_string_with_domain(raw, DEFAULT_DOMAIN_TAG)
     }
@@ -58,7 +60,9 @@ impl Seed {
     ///
     /// # Errors
     ///
-    /// Returns [`SeedError::Empty`] if `raw` is empty after trimming.
+    /// # Panics
+    ///
+    /// Panics if `raw` is empty after trimming.
     pub fn from_string_with_domain(raw: impl Into<String>, domain_tag: &str) -> Self {
         let raw = raw.into();
         let trimmed = raw.trim();

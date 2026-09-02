@@ -267,7 +267,7 @@ seed-canvas serve                # open http://localhost:8080</code></pre>
     shell("About", body)
 }
 
-/// Error page used by [`AppError::into_response`].
+/// Error page used by the handler error converter.
 pub fn error_page(code: u16, title: &str, body: &str) -> String {
     let html = format!(
         r#"<section class="error">

@@ -151,7 +151,7 @@ enum Command {
         root: PathBuf,
     },
 
-    /// Print an <iframe> snippet that embeds a live artwork from a
+    /// Print an `<iframe>` snippet that embeds a live artwork from a
     /// running `seed-canvas serve` instance.
     Embed {
         /// Template identifier.

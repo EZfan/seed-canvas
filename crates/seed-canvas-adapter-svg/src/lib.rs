@@ -18,7 +18,7 @@ use seed_canvas_core::surface::{Color, OutputFormat, Surface, SurfaceError, Vec2
 use std::fmt::Write as _;
 use thiserror::Error;
 
-/// Adapter name registered with the [`AdapterRegistry`].
+/// Adapter name registered with the adapter registry.
 pub const ADAPTER_NAME: &str = "svg";
 
 /// Errors specific to the SVG adapter.

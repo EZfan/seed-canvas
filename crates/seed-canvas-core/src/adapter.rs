@@ -193,8 +193,7 @@ impl std::fmt::Debug for AdapterRegistry {
     }
 }
 
-/// Convenience: re-export [`SurfaceError`] so adapters can name it without
-/// importing two modules.
+// Kept for backwards compatibility with earlier internal imports.
 pub use crate::surface::SurfaceError as _SurfaceError;
 
 #[cfg(test)]

@@ -4,7 +4,7 @@
 //! to know about. It encapsulates the full pipeline:
 //!
 //! 1. Validate `params` against the template's JSON Schema.
-//! 2. Construct a [`Surface`] from the requested adapter.
+//! 2. Construct a [`crate::surface::Surface`] from the requested adapter.
 //! 3. Run the template's entry function.
 //! 4. Encode the surface into the requested format.
 //! 5. Hash the output bytes for content addressing.
@@ -103,8 +103,10 @@ pub enum RenderError {
 ///
 /// # Errors
 ///
-/// Any of [`TemplateError`], [`AdapterError`], or [`SurfaceError`] may
-/// surface; they are wrapped in [`RenderError`] for ergonomic callers.
+/// Any of [`TemplateError`](crate::template::TemplateError),
+/// [`AdapterError`](crate::adapter::AdapterError), or
+/// [`SurfaceError`](crate::surface::SurfaceError) may surface; they are
+/// wrapped in [`RenderError`] for ergonomic callers.
 pub fn render(
     template: &Template,
     request: &RenderRequest,

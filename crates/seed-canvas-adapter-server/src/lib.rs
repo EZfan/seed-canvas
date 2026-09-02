@@ -23,7 +23,7 @@ use std::sync::Arc;
 use thiserror::Error;
 use tiny_skia::{Color as SkColor, FillRule, Paint, PathBuilder, Pixmap, Stroke, Transform};
 
-/// Adapter name registered with the [`AdapterRegistry`].
+/// Adapter name registered with the adapter registry.
 pub const ADAPTER_NAME: &str = "server";
 
 /// Errors specific to the server adapter. Most error paths forward

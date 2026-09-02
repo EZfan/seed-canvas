@@ -11,8 +11,11 @@ permissions:
 
 env:
   CARGO_TERM_COLOR: always
-  RUSTFLAGS: -D warnings
   RUST_BACKTRACE: 1
+  # Lint strictness lives in the clippy job's own flags, not here: a
+  # global RUSTFLAGS=-D warnings would fail test builds whenever any
+  # third-party dependency emits a warning on one platform but not
+  # another.
 
 jobs:
   fmt:
