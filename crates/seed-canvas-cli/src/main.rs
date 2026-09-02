@@ -170,6 +170,40 @@ enum Command {
         #[arg(long, default_value_t = 512)]
         height: u32,
     },
+
+    /// Manage remote template registries (stored in the user config dir).
+    Registry {
+        #[command(subcommand)]
+        action: RegistryAction,
+    },
+
+    /// Look up a template in the built-in and configured registries.
+    /// Built-in templates render immediately; external ones report
+    /// their availability.
+    Install {
+        /// Template identifier to look up.
+        template: String,
+        /// Fetch fresh indexes from configured remote registries first.
+        #[arg(long)]
+        update: bool,
+    },
+}
+
+/// Subcommands under `seed-canvas registry`.
+#[derive(Subcommand, Debug)]
+enum RegistryAction {
+    /// List the built-in registry and every configured remote source.
+    List,
+    /// Fetch a remote index and remember its URL.
+    Add {
+        /// HTTPS URL of a registry index JSON document.
+        url: String,
+    },
+    /// Forget a configured remote source.
+    Remove {
+        /// The URL previously added.
+        url: String,
+    },
 }
 
 #[derive(Copy, Clone, Debug, ValueEnum)]
@@ -281,6 +315,178 @@ fn main() -> Result<()> {
             );
             Ok(())
         }
+        Command::Registry { action } => registry_action(action),
+        Command::Install { template, update } => install_cmd(&template, update),
+    }
+}
+
+/// Path of the user config file holding remote registry URLs.
+fn registries_config_path() -> Result<PathBuf> {
+    let config_dir = match std::env::var_os("XDG_CONFIG_HOME") {
+        Some(xdg) => PathBuf::from(xdg),
+        None => {
+            let home = std::env::var_os("HOME").context("cannot determine home directory")?;
+            PathBuf::from(home).join(".config")
+        }
+    };
+    Ok(config_dir.join("seed-canvas").join("registries.json"))
+}
+
+/// Read the configured remote registry URLs.
+fn load_registries() -> Result<Vec<String>> {
+    let path = registries_config_path()?;
+    if !path.exists() {
+        return Ok(Vec::new());
+    }
+    let raw = std::fs::read_to_string(&path)
+        .with_context(|| format!("failed to read {}", path.display()))?;
+    let urls: Vec<String> = serde_json::from_str(&raw).context("registries.json is malformed")?;
+    Ok(urls)
+}
+
+/// Persist the configured remote registry URLs.
+fn save_registries(urls: &[String]) -> Result<()> {
+    let path = registries_config_path()?;
+    if let Some(parent) = path.parent() {
+        std::fs::create_dir_all(parent)?;
+    }
+    std::fs::write(&path, serde_json::to_vec_pretty(urls)?)?;
+    Ok(())
+}
+
+fn registry_action(action: RegistryAction) -> Result<()> {
+    match action {
+        RegistryAction::List => {
+            let builtin = seed_canvas_registry::builtin_index()?;
+            println!(
+                "built-in registry: {} ({} templates)",
+                builtin.name,
+                builtin.templates.len()
+            );
+            for t in &builtin.templates {
+                println!(
+                    "  • {id} v{ver} [{license}]{builtin}",
+                    id = t.id,
+                    ver = t.version,
+                    license = t.license,
+                    builtin = if t.builtin { " (built-in)" } else { "" },
+                );
+            }
+            let remotes = load_registries()?;
+            if remotes.is_empty() {
+                println!(
+                    "\nremote registries: none (add one with `seed-canvas registry add <url>`)"
+                );
+            } else {
+                println!("\nremote registries:");
+                for url in &remotes {
+                    println!("  • {url}");
+                }
+            }
+            Ok(())
+        }
+        RegistryAction::Add { url } => {
+            // HTTPS everywhere except loopback, which developers use for
+            // local registry testing.
+            let is_loopback =
+                url.starts_with("http://127.0.0.1") || url.starts_with("http://localhost");
+            if !url.starts_with("https://") && !is_loopback {
+                bail!("registry URLs must use https (got {url:?})");
+            }
+            let cache_dir = registries_config_path()?
+                .parent()
+                .map(|p| p.join("cache"))
+                .context("cannot resolve cache dir")?;
+            let client = seed_canvas_registry::RegistryClient::new(cache_dir);
+            let index = client
+                .fetch_and_cache(&url)
+                .context("failed to fetch registry index")?;
+            let mut urls = load_registries()?;
+            if urls.contains(&url) {
+                println!(
+                    "✓ refreshed {} ({} templates)",
+                    index.name,
+                    index.templates.len()
+                );
+            } else {
+                urls.push(url.clone());
+                save_registries(&urls)?;
+                println!(
+                    "✓ added {url} — {} ({} templates)",
+                    index.name,
+                    index.templates.len()
+                );
+            }
+            Ok(())
+        }
+        RegistryAction::Remove { url } => {
+            let mut urls = load_registries()?;
+            let before = urls.len();
+            urls.retain(|u| u != &url);
+            if urls.len() == before {
+                bail!("{url} is not in the configured registries");
+            }
+            save_registries(&urls)?;
+            println!("✓ removed {url}");
+            Ok(())
+        }
+    }
+}
+
+fn install_cmd(template_id: &str, update: bool) -> Result<()> {
+    // 1. Built-in templates win immediately.
+    if resolve_template(template_id).is_ok() {
+        println!("✓ {template_id} is built into this binary — nothing to install");
+        println!("  try: seed-canvas render --template {template_id} --seed hello --out out.png");
+        return Ok(());
+    }
+
+    // 2. Optionally refresh remote indexes.
+    let cache_dir = registries_config_path()?
+        .parent()
+        .map(|p| p.join("cache"))
+        .context("cannot resolve cache dir")?;
+    let client = seed_canvas_registry::RegistryClient::new(cache_dir);
+    let remotes = load_registries()?;
+
+    let mut found: Option<(String, seed_canvas_registry::TemplateEntry)> = None;
+    for url in &remotes {
+        let index = if update {
+            match client.fetch_and_cache(url) {
+                Ok(idx) => idx,
+                Err(err) => {
+                    tracing::warn!("refresh of {url} failed ({err}); using cache");
+                    client.cached(url).context("no cached index for {url}")?
+                }
+            }
+        } else {
+            client
+                .cached(url)
+                .with_context(|| format!("{url} has no cached index; run with --update"))?
+        };
+        if let Some(entry) = index.get(template_id) {
+            found = Some((url.clone(), entry.clone()));
+            break;
+        }
+    }
+
+    match found {
+        Some((source, entry)) => {
+            println!("found {} v{} in {}", entry.id, entry.version, source);
+            println!("license: {}", entry.license);
+            println!();
+            println!(
+                "note: external template distribution (WASM packages) is on the roadmap;"
+            );
+            println!(
+                "      this version of seed-canvas renders the built-in templates only."
+            );
+            Ok(())
+        }
+        None => bail!(
+            "template {template_id:?} not found in the built-in registry or {} configured remote(s)",
+            remotes.len()
+        ),
     }
 }
 

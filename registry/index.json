@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "name": "seed-canvas official templates",
+  "url": "https://raw.githubusercontent.com/EZfan/seed-canvas/main/registry/index.json",
+  "updated": "2026-09-02T00:00:00Z",
+  "templates": [
+    {
+      "id": "galaxy",
+      "name": "Galaxy",
+      "description": "Spiral galaxy with nebula haze, layered core glow, and haloed foreground stars.",
+      "version": "0.1.0",
+      "authors": ["seed-canvas contributors"],
+      "license": "MIT",
+      "tags": ["space", "particles", "nebula"],
+      "builtin": true,
+      "minSeedCanvas": "0.1.0"
+    },
+    {
+      "id": "particles",
+      "name": "Particles",
+      "description": "Colored flow-field ribbons; particles follow a shared sinusoidal direction field.",
+      "version": "0.1.0",
+      "authors": ["seed-canvas contributors"],
+      "license": "MIT",
+      "tags": ["flow", "field", "ribbons"],
+      "builtin": true,
+      "minSeedCanvas": "0.1.0"
+    },
+    {
+      "id": "mandala",
+      "name": "Mandala",
+      "description": "Symmetric petal rings with faint guide circles; N-fold rotational symmetry.",
+      "version": "0.1.0",
+      "authors": ["seed-canvas contributors"],
+      "license": "MIT",
+      "tags": ["symmetry", "geometric", "mandala"],
+      "builtin": true,
+      "minSeedCanvas": "0.1.0"
+    }
+  ]
+}

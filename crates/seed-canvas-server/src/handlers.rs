@@ -295,7 +295,11 @@ pub async fn api_search(
     State(state): State<Arc<ServerState>>,
     Query(params): Query<SearchParams>,
 ) -> Result<axum::Json<serde_json::Value>, AppError> {
-    let rows = state.gallery.search(&params.q, params.limit)?;
+    // Quote the whole query as an FTS5 phrase so seeds containing `-`,
+    // quotes, or other operator characters are matched literally
+    // instead of being parsed as query syntax.
+    let quoted = format!("\"{}\"", params.q.replace('"', "\"\""));
+    let rows = state.gallery.search(&quoted, params.limit)?;
     Ok(axum::Json(serde_json::json!({
         "query": params.q,
         "count": rows.len(),

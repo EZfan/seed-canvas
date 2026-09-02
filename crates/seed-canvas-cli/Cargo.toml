@@ -22,6 +22,7 @@ seed-canvas-adapter-svg = { workspace = true }
 seed-canvas-server = { workspace = true }
 seed-canvas-storage = { workspace = true }
 seed-canvas-embed = { workspace = true }
+seed-canvas-registry = { workspace = true }
 galaxy = { workspace = true }
 particles = { workspace = true }
 mandala = { workspace = true }
