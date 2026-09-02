@@ -1,0 +1,38 @@
+# release-plz configuration — drives automated release PRs from `main`.
+#
+# See https://release-plz.dev/docs/configuration for the full schema.
+
+[workspace]
+# Enable shared SemVer across all crates. We treat every crate as 0.1.0 for
+# now; release-plz will bump them in lockstep.
+semver_check = true
+dependencies_update = true
+changelog_update = true
+
+changelog_config = { path = "CHANGELOG.md", body_required = false, kind = "markdown" }
+
+# Publish configuration — at M1 we publish dry-c except to test the pipeline.
+# Set GITHUB_TOKEN + CARGO_REGISTRY_TOKEN to enable actual publishes.
+[[package]]
+name = "seed-canvas-core"
+publish = false
+
+[[package]]
+name = "seed-canvas-adapter-server"
+publish = false
+
+[[package]]
+name = "seed-canvas-adapter-svg"
+publish = false
+
+[[package]]
+name = "seed-canvas-storage"
+publish = false
+
+[[package]]
+name = "seed-canvas-cli"
+publish = false
+
+[[package]]
+name = "galaxy"
+publish = false

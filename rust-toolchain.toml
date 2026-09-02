@@ -1,0 +1,6 @@
+# Pins the Rust toolchain so contributors, CI and Docker agree.
+# Bump in lockstep with [workspace.package] rust-version.
+[toolchain]
+channel = "stable"
+components = ["rustfmt", "clippy", "rust-src"]
+profile = "minimal"

@@ -1,0 +1,44 @@
+# Rust build artifacts
+/target/
+**/target/
+**/*.rs.bk
+Cargo.lock.bak
+
+# Tooling caches
+.cargo/
+.cargo-llvm-cov/
+
+# Coverage / bench reports
+/coverage/
+/tarpaulin-report.html
+**/lcov.info
+critout/
+benches/.criterion/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local dev artifacts
+/output/
+/gallery/
+/artworks/
+*.log
+.env
+.env.local
+
+# Generated / downloaded
+/codegen/
+
+# Docs build
+/docs/.astro/
+/docs/dist/
+/docs/node_modules/
+
+# Docker
+docker/.scratch/
