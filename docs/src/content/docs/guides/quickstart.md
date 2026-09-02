@@ -5,10 +5,13 @@ description: Render your first deterministic artwork in under a minute.
 
 ## Install
 
-Requires Rust ≥ 1.80.
+Requires Rust ≥ 1.80. crates.io publishing is being prepared, so
+pre-release builds come from source:
 
 ```bash
-cargo install seed-canvas-cli
+git clone https://github.com/EZfan/seed-canvas
+cd seed-canvas
+cargo install --path crates/seed-canvas-cli
 ```
 
 ## Render

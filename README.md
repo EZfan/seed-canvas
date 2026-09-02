@@ -145,24 +145,8 @@ seed-canvas/
 
 ## Installation
 
-### Homebrew (macOS / Linux)
-
-```bash
-brew install seed-canvas/tap/seed-canvas
-```
-
-### Cargo (any platform)
-
-```bash
-cargo install seed-canvas-cli
-```
-
-### Docker
-
-```bash
-docker run --rm -v "$PWD:/out" seedcanvas/seed-canvas \
-  render --template galaxy --seed cosmos --out /out/cosmos.png
-```
+> **Pre-release note:** crates.io publishing is being prepared. Until
+> then, install from source — one command once Rust ≥ 1.80 is installed.
 
 ### From source
 
@@ -170,6 +154,13 @@ docker run --rm -v "$PWD:/out" seedcanvas/seed-canvas \
 git clone https://github.com/EZfan/seed-canvas
 cd seed-canvas
 cargo install --path crates/seed-canvas-cli
+```
+
+### Docker
+
+```bash
+docker run --rm -v "$PWD:/out" seedcanvas/seed-canvas \
+  render --template galaxy --seed cosmos --out /out/cosmos.png
 ```
 
 ## Usage

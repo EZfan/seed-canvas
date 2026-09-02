@@ -74,12 +74,14 @@ docs(readme): clarify share URL format
 
 ## Release Process
 
-Releases are automated via `release-please`:
+Releases are automated via `release-plz` (workflow_dispatch for now):
 
-1. Merge feature PRs into `main`.
-2. release-please opens a release PR that bumps the version and updates CHANGELOG.
-3. Merging the release PR tags the commit and publishes to npm, PyPI, and
-   Docker Hub.
+1. Merge feature PRs into `main` with Conventional Commit messages.
+2. Running the release workflow opens a release PR that bumps versions
+   and updates the CHANGELOG.
+3. Merging the release PR tags the commit. Publishing to crates.io is
+   gated on a `CARGO_REGISTRY_TOKEN` secret and stays disabled until
+   the first public release.
 
 ## License
 
