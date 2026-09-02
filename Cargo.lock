@@ -749,7 +749,7 @@ dependencies = [
 
 [[package]]
 name = "galaxy"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "clap",
  "seed-canvas-adapter-server",
@@ -1193,7 +1193,7 @@ checksum = "f9f8bd3e56ce4dfc153cf470fffbfa98c7620958b312ca5c3a4b8d5181fd13c6"
 
 [[package]]
 name = "mandala"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "clap",
  "seed-canvas-adapter-server",
@@ -1413,7 +1413,7 @@ dependencies = [
 
 [[package]]
 name = "particles"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "clap",
  "seed-canvas-adapter-server",
@@ -1912,7 +1912,7 @@ checksum = "94143f37725109f92c262ed2cf5e59bce7498c01bcc1502d7b9afe439a4e9f49"
 
 [[package]]
 name = "seed-canvas-adapter-server"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "png",
  "pretty_assertions",
@@ -1924,7 +1924,7 @@ dependencies = [
 
 [[package]]
 name = "seed-canvas-adapter-svg"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "seed-canvas-core",
  "serde",
@@ -1935,7 +1935,7 @@ dependencies = [
 
 [[package]]
 name = "seed-canvas-cli"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "anyhow",
  "clap",
@@ -1959,7 +1959,7 @@ dependencies = [
 
 [[package]]
 name = "seed-canvas-core"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "blake3",
  "chrono",
@@ -1980,7 +1980,7 @@ dependencies = [
 
 [[package]]
 name = "seed-canvas-embed"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "base64",
  "chrono",
@@ -1990,7 +1990,7 @@ dependencies = [
 
 [[package]]
 name = "seed-canvas-registry"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "seed-canvas-core",
  "serde",
@@ -2003,7 +2003,7 @@ dependencies = [
 
 [[package]]
 name = "seed-canvas-server"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "anyhow",
  "axum",
@@ -2032,7 +2032,7 @@ dependencies = [
 
 [[package]]
 name = "seed-canvas-storage"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "chrono",
  "r2d2",

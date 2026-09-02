@@ -17,7 +17,7 @@ members = [
 # A single virtual manifest keeps every crate aligned to one MSRV and one set
 # of lints. New crates inherit these defaults automatically.
 [workspace.package]
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 rust-version = "1.80"
 license = "MIT"
@@ -45,17 +45,17 @@ missing_panics_doc = "allow"
 
 [workspace.dependencies]
 # Workspace-internal
-seed-canvas-core = { path = "crates/seed-canvas-core", version = "0.1.0" }
-seed-canvas-adapter-server = { path = "crates/seed-canvas-adapter-server", version = "0.1.0" }
-seed-canvas-adapter-svg = { path = "crates/seed-canvas-adapter-svg", version = "0.1.0" }
-seed-canvas-storage = { path = "crates/seed-canvas-storage", version = "0.1.0" }
-seed-canvas-server = { path = "crates/seed-canvas-server", version = "0.1.0" }
-seed-canvas-embed = { path = "crates/seed-canvas-embed", version = "0.1.0" }
-seed-canvas-registry = { path = "crates/seed-canvas-registry", version = "0.1.0" }
-seed-canvas-cli = { path = "crates/seed-canvas-cli", version = "0.1.0" }
-galaxy = { path = "examples/galaxy", version = "0.1.0" }
-particles = { path = "examples/particles", version = "0.1.0" }
-mandala = { path = "examples/mandala", version = "0.1.0" }
+seed-canvas-core = { path = "crates/seed-canvas-core", version = "0.1.1" }
+seed-canvas-adapter-server = { path = "crates/seed-canvas-adapter-server", version = "0.1.1" }
+seed-canvas-adapter-svg = { path = "crates/seed-canvas-adapter-svg", version = "0.1.1" }
+seed-canvas-storage = { path = "crates/seed-canvas-storage", version = "0.1.1" }
+seed-canvas-server = { path = "crates/seed-canvas-server", version = "0.1.1" }
+seed-canvas-embed = { path = "crates/seed-canvas-embed", version = "0.1.1" }
+seed-canvas-registry = { path = "crates/seed-canvas-registry", version = "0.1.1" }
+seed-canvas-cli = { path = "crates/seed-canvas-cli", version = "0.1.1" }
+galaxy = { path = "examples/galaxy", version = "0.1.1" }
+particles = { path = "examples/particles", version = "0.1.1" }
+mandala = { path = "examples/mandala", version = "0.1.1" }
 
 # Async runtime + utilities
 tokio = { version = "1.41", features = ["rt-multi-thread", "macros", "sync", "fs", "signal", "time"] }
