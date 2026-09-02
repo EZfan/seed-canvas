@@ -1,0 +1,9 @@
+# Keep the build context small.
+.git
+.github
+target
+docs
+node_modules
+*.log
+.DS_Store
+docker/.scratch

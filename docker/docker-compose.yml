@@ -1,0 +1,24 @@
+# Self-hosted gallery in one command:
+#   docker compose up -d
+# then open http://localhost:8080
+services:
+  gallery:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    image: seedcanvas/seed-canvas:latest
+    container_name: seed-canvas
+    ports:
+      - "8080:8080"
+    volumes:
+      - gallery-data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "seed-canvas", "doctor"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  gallery-data:

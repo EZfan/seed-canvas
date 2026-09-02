@@ -95,6 +95,23 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
+  docker:
+    name: docker build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/Dockerfile
+          push: false
+          tags: seedcanvas/seed-canvas:ci
+      - name: Smoke test binary inside image
+        run: |
+          docker run --rm seedcanvas/seed-canvas:ci --version
+          docker run --rm seedcanvas/seed-canvas:ci doctor
+
   docs:
     name: rustdoc
     runs-on: ubuntu-latest

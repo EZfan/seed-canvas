@@ -78,7 +78,8 @@ impl Gallery {
             c.execute_batch(
                 "PRAGMA journal_mode = WAL;
                      PRAGMA foreign_keys = ON;
-                     PRAGMA synchronous = NORMAL;",
+                     PRAGMA synchronous = NORMAL;
+                     PRAGMA busy_timeout = 5000;",
             )
         });
         let pool = Pool::builder().max_size(8).build(manager)?;
