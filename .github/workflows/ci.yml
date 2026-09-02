@@ -58,7 +58,8 @@ jobs:
       - name: report clippy errors
         if: failure()
         run: |
-          grep -E "^(error|warning)" -A 8 clippy.log clippy-ex.log | tail -60 | sed ':a;N;$!ba;s/\n/%0A/g' | while IFS= read -r chunk; do echo "::error::$chunk"; done
+          grep -nE "error|panic|cannot find|not found" clippy.log | head -25 | cut -c1-380 | while IFS= read -r line; do echo "::error::$line"; done
+          exit 0
 
   test:
     name: test (${{ matrix.os }})
@@ -81,7 +82,8 @@ jobs:
         if: failure()
         shell: bash
         run: |
-          grep -E "^(error|failures:|---- |test result: FAILED)" -A 8 test.log | tail -60 | sed ':a;N;$!ba;s/\n/%0A/g' | while IFS= read -r chunk; do echo "::error::$chunk"; done
+          grep -nE "error|panic|FAILED|failures:" test.log | head -25 | cut -c1-380 | while IFS= read -r line; do echo "::error::$line"; done
+          exit 0
 
   determinism:
     name: determinism (Linux)
