@@ -48,9 +48,22 @@ jobs:
         with:
           shared-key: clippy
       - name: clippy (workspace)
-        run: cargo clippy --workspace --all-targets --locked -- -D warnings
+        run: |
+          cargo clippy --workspace --all-targets --locked -- -D warnings 2>&1 | tee clippy.log
+          exit ${PIPESTATUS[0]}
       - name: clippy (examples)
-        run: cargo clippy --examples --locked -- -D warnings
+        run: |
+          cargo clippy --examples --locked -- -D warnings 2>&1 | tee clippy-ex.log
+          exit ${PIPESTATUS[0]}
+      - name: dump clippy output to summary
+        if: failure()
+        run: |
+          {
+            echo "### clippy errors (${{ matrix.os }})"
+            '```'
+            grep -E "^(error|warning)" -A 8 clippy.log clippy-ex.log | tail -80
+            '```'
+          } >> "$GITHUB_STEP_SUMMARY"
 
   test:
     name: test (${{ matrix.os }})
@@ -66,7 +79,19 @@ jobs:
         with:
           shared-key: test
       - name: cargo test
-        run: cargo test --workspace --locked --all-targets
+        run: |
+          cargo test --workspace --locked --all-targets 2>&1 | tee test.log
+          exit ${PIPESTATUS[0]}
+      - name: dump test output to summary
+        if: failure()
+        shell: bash
+        run: |
+          {
+            echo "### test output (${{ matrix.os }})"
+            '```'
+            grep -E "^(error|warning: unused|failures:|---- )" -A 8 test.log | tail -80
+            '```'
+          } >> "$GITHUB_STEP_SUMMARY"
 
   determinism:
     name: determinism (Linux)
