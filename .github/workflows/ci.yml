@@ -60,9 +60,9 @@ jobs:
         run: |
           {
             echo "### clippy errors (${{ matrix.os }})"
-            '```'
+            echo '```'
             grep -E "^(error|warning)" -A 8 clippy.log clippy-ex.log | tail -80
-            '```'
+            echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
 
   test:
@@ -88,9 +88,9 @@ jobs:
         run: |
           {
             echo "### test output (${{ matrix.os }})"
-            '```'
+            echo '```'
             grep -E "^(error|warning: unused|failures:|---- )" -A 8 test.log | tail -80
-            '```'
+            echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
 
   determinism:
