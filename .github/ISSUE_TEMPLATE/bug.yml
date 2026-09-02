@@ -1,0 +1,55 @@
+name: 🐛 Bug Report
+description: File a bug report to help us improve.
+labels: ["bug", "needs-triage"]
+body:
+    - type: markdown
+      attributes:
+        value: |
+          Thanks for taking the time to file a bug! Please fill in the
+          template below so we can reproduce and fix the issue quickly.
+    - type: input
+      id: version
+      attributes:
+        label: seed-canvas version
+        placeholder: "0.1.0"
+      validation:
+        required: true
+    - type: dropdown
+      id: os
+      attributes:
+        label: Operating system
+        options:
+          - macOS
+          - Linux
+          - Windows
+          - Other
+      validation:
+        required: true
+    - type: textarea
+      id: repro
+      attributes:
+        label: Reproduction steps
+        placeholder: |
+          1. seed-canvas render --template galaxy --seed foo
+          2. See error
+      validation:
+        required: true
+    - type: textarea
+      id: expected
+      attributes:
+        label: Expected behavior
+        placeholder: "I expected the artwork to render successfully."
+    - type: textarea
+      id: actual
+      attributes:
+        label: Actual behavior
+        placeholder: "Instead, I saw the following error…"
+    - type: textarea
+      id: logs
+      attributes:
+        label: Relevant logs
+        placeholder: |
+          ```
+          $ seed-canvas doctor
+          ...
+          ```

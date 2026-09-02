@@ -1,0 +1,27 @@
+[package]
+name = "galaxy"
+description = "Official galaxy example template for seed-canvas — deterministic particle nebula."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+documentation.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+[lib]
+name = "galaxy"
+path = "src/lib.rs"
+
+[[bin]]
+name = "galaxy"
+path = "src/main.rs"
+
+[dependencies]
+seed-canvas-core = { workspace = true }
+seed-canvas-adapter-server = { workspace = true }
+seed-canvas-adapter-svg = { workspace = true }
+serde_json = { workspace = true }
+clap = { workspace = true }

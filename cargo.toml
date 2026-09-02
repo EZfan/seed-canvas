@@ -1,0 +1,12 @@
+[alias]
+# Helpful shortcuts that match common developer muscle memory.
+b = "build"
+c = "check"
+t = "test"
+r = "run --bin seed-canvas"
+br = "build --release"
+fmt-check = "fmt --all -- --check"
+lint = "clippy --workspace --all-targets -- -D warnings"
+audit = "audit"
+bench = "bench --workspace"
+doc = "doc --workspace --no-deps"

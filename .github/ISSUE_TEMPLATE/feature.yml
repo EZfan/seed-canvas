@@ -1,0 +1,33 @@
+name: ✨ Feature Request
+description: Suggest a new template, adapter, or CLI command.
+labels: ["enhancement", "needs-triage"]
+body:
+    - type: textarea
+      id: problem
+      attributes:
+        label: Problem
+        placeholder: "I'm always frustrated when…"
+      validation:
+        required: true
+    - type: textarea
+      id: solution
+      attributes:
+        label: Proposed solution
+        placeholder: "I'd love to see a `seed-canvas …` command that…"
+    - type: textarea
+      id: alternatives
+      attributes:
+        label: Alternatives considered
+        placeholder: "I also considered… but…"
+    - type: dropdown
+      id: area
+      attributes:
+        label: Area
+        options:
+          - Core (seed/template/surface)
+          - Adapter
+          - CLI
+          - Storage
+          - Server
+          - Documentation
+          - Other

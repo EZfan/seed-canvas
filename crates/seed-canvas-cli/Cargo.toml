@@ -1,0 +1,29 @@
+[package]
+name = "seed-canvas-cli"
+description = "Command-line interface for seed-canvas — deterministic generative art, one command away."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+documentation.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+[[bin]]
+name = "seed-canvas"
+path = "src/main.rs"
+
+[dependencies]
+seed-canvas-core = { workspace = true }
+seed-canvas-adapter-server = { workspace = true }
+seed-canvas-adapter-svg = { workspace = true }
+galaxy = { workspace = true }
+clap = { workspace = true }
+anyhow = { workspace = true }
+thiserror = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }

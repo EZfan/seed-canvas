@@ -1,0 +1,122 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/seed-canvas-core",
+    "crates/seed-canvas-adapter-server",
+    "crates/seed-canvas-adapter-svg",
+    "crates/seed-canvas-storage",
+    "crates/seed-canvas-cli",
+    "examples/galaxy",
+]
+
+# A single virtual manifest keeps every crate aligned to one MSRV and one set
+# of lints. New crates inherit these defaults automatically.
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.80"
+license = "MIT"
+license-file = "../LICENSE"
+repository = "https://github.com/seed-canvas/seed-canvas"
+homepage = "https://seed-canvas.dev"
+documentation = "https://docs.seed-canvas.dev"
+readme = "../README.md"
+authors = ["seed-canvas contributors"]
+keywords = ["generative-art", "deterministic", "creative-coding", "cli", "svg"]
+categories = ["command-line-utilities", "graphics", "multimedia::images"]
+publish = false  # published per-crate via release-plz; workspace itself stays private
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+missing_docs = "warn"
+unused_must_use = "deny"
+
+[workspace.lints.clippy]
+pedantic = { level = "warn", priority = -1 }
+module_name_repetitions = "allow"
+must_use_candidate = "allow"
+missing_errors_doc = "allow"
+missing_panics_doc = "allow"
+
+[workspace.dependencies]
+# Workspace-internal
+seed-canvas-core = { path = "crates/seed-canvas-core", version = "0.1.0" }
+seed-canvas-adapter-server = { path = "crates/seed-canvas-adapter-server", version = "0.1.0" }
+seed-canvas-adapter-svg = { path = "crates/seed-canvas-adapter-svg", version = "0.1.0" }
+seed-canvas-storage = { path = "crates/seed-canvas-storage", version = "0.1.0" }
+seed-canvas-cli = { path = "crates/seed-canvas-cli", version = "0.1.0" }
+galaxy = { path = "examples/galaxy", version = "0.1.0" }
+
+# Async runtime + utilities
+tokio = { version = "1.41", features = ["rt-multi-thread", "macros", "sync", "fs", "signal", "time"] }
+futures = "0.3"
+async-trait = "0.1"
+
+# CLI
+clap = { version = "4.5", features = ["derive", "cargo", "wrap_help", "color"] }
+clap_complete = "4.5"
+indicatif = { version = "0.17", features = ["improved_unicode"] }
+console = "0.15"
+
+# Serialization
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1", features = ["preserve_order"] }
+toml = "0.8"
+schemars = { version = "0.8", features = ["derive"] }
+jsonschema = { version = "0.28", default-features = false }
+
+# Errors
+thiserror = "2"
+anyhow = "1"
+
+# Tracing
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt"] }
+
+# Hashing + crypto
+sha2 = "0.10"
+hex = "0.4"
+blake3 = "1.5"
+
+# Web framework
+axum = { version = "0.7", features = ["http1", "json", "query", "tokio", "multipart"] }
+tower = "0.5"
+tower-http = { version = "0.6", features = ["trace", "cors", "compression-gzip"] }
+hyper = "1"
+
+# Storage
+rusqlite = { version = "0.32", features = ["bundled", "modern_sqlite"] }
+r2d2 = "0.8"
+r2d2_sqlite = "0.25"
+
+# Graphics (server adapter)
+tiny-skia = "0.11"
+png = "0.17"
+usvg = "0.45"
+resvg = "0.45"
+
+# Time, paths, ids
+chrono = { version = "0.4", features = ["serde"] }
+uuid = { version = "1.11", features = ["v4", "serde"] }
+url = "2.5"
+percent-encoding = "2.3"
+
+# Template registry
+git2 = { version = "0.19", default-features = false }
+
+# Testing
+proptest = "1.5"
+pretty_assertions = "1.4"
+insta = { version = "1.41", features = ["yaml", "redactions"] }
+
+# Benchmarking
+criterion = { version = "0.5", features = ["html_reports"] }
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+strip = "debuginfo"
+panic = "abort"
+
+[profile.bench]
+debug = true
