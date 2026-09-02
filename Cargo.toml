@@ -5,8 +5,11 @@ members = [
     "crates/seed-canvas-adapter-server",
     "crates/seed-canvas-adapter-svg",
     "crates/seed-canvas-storage",
+    "crates/seed-canvas-server",
     "crates/seed-canvas-cli",
     "examples/galaxy",
+    "examples/particles",
+    "examples/mandala",
 ]
 
 # A single virtual manifest keeps every crate aligned to one MSRV and one set
@@ -44,8 +47,11 @@ seed-canvas-core = { path = "crates/seed-canvas-core", version = "0.1.0" }
 seed-canvas-adapter-server = { path = "crates/seed-canvas-adapter-server", version = "0.1.0" }
 seed-canvas-adapter-svg = { path = "crates/seed-canvas-adapter-svg", version = "0.1.0" }
 seed-canvas-storage = { path = "crates/seed-canvas-storage", version = "0.1.0" }
+seed-canvas-server = { path = "crates/seed-canvas-server", version = "0.1.0" }
 seed-canvas-cli = { path = "crates/seed-canvas-cli", version = "0.1.0" }
 galaxy = { path = "examples/galaxy", version = "0.1.0" }
+particles = { path = "examples/particles", version = "0.1.0" }
+mandala = { path = "examples/mandala", version = "0.1.0" }
 
 # Async runtime + utilities
 tokio = { version = "1.41", features = ["rt-multi-thread", "macros", "sync", "fs", "signal", "time"] }

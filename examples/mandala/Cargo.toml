@@ -1,6 +1,6 @@
 [package]
-name = "seed-canvas-cli"
-description = "Command-line interface for seed-canvas — deterministic generative art, one command away."
+name = "mandala"
+description = "Example template for seed-canvas: a symmetric mandala with configurable rings and symmetry."
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -11,21 +11,17 @@ documentation.workspace = true
 keywords.workspace = true
 categories.workspace = true
 
+[lib]
+name = "mandala"
+path = "src/lib.rs"
+
 [[bin]]
-name = "seed-canvas"
+name = "mandala"
 path = "src/main.rs"
 
 [dependencies]
 seed-canvas-core = { workspace = true }
 seed-canvas-adapter-server = { workspace = true }
 seed-canvas-adapter-svg = { workspace = true }
-seed-canvas-server = { workspace = true }
-galaxy = { workspace = true }
-clap = { workspace = true }
-anyhow = { workspace = true }
-thiserror = { workspace = true }
-serde = { workspace = true }
 serde_json = { workspace = true }
-tracing = { workspace = true }
-tracing-subscriber = { workspace = true }
-tokio = { workspace = true }
+clap = { workspace = true }
