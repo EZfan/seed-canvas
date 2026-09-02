@@ -55,15 +55,10 @@ jobs:
         run: |
           cargo clippy --examples --locked -- -D warnings 2>&1 | tee clippy-ex.log
           exit ${PIPESTATUS[0]}
-      - name: dump clippy output to summary
+      - name: report clippy errors
         if: failure()
         run: |
-          {
-            echo "### clippy errors (${{ matrix.os }})"
-            echo '```'
-            grep -E "^(error|warning)" -A 8 clippy.log clippy-ex.log | tail -80
-            echo '```'
-          } >> "$GITHUB_STEP_SUMMARY"
+          grep -E "^(error|warning)" -A 8 clippy.log clippy-ex.log | tail -60 | sed ':a;N;$!ba;s/\n/%0A/g' | while IFS= read -r chunk; do echo "::error::$chunk"; done
 
   test:
     name: test (${{ matrix.os }})
@@ -82,16 +77,11 @@ jobs:
         run: |
           cargo test --workspace --locked --all-targets 2>&1 | tee test.log
           exit ${PIPESTATUS[0]}
-      - name: dump test output to summary
+      - name: report test failures
         if: failure()
         shell: bash
         run: |
-          {
-            echo "### test output (${{ matrix.os }})"
-            echo '```'
-            grep -E "^(error|warning: unused|failures:|---- )" -A 8 test.log | tail -80
-            echo '```'
-          } >> "$GITHUB_STEP_SUMMARY"
+          grep -E "^(error|failures:|---- |test result: FAILED)" -A 8 test.log | tail -60 | sed ':a;N;$!ba;s/\n/%0A/g' | while IFS= read -r chunk; do echo "::error::$chunk"; done
 
   determinism:
     name: determinism (Linux)
