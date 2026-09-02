@@ -112,6 +112,17 @@ enum Command {
         #[arg(long, default_value = "https://art.example.com")]
         host: String,
     },
+
+    /// Run the self-hosted HTTP gallery server. Open the printed URL in
+    /// a browser to browse the gallery.
+    Serve {
+        /// Address to bind. Use `0.0.0.0:8080` to accept LAN traffic.
+        #[arg(long, default_value = "127.0.0.1:8080")]
+        addr: String,
+        /// Workspace root (defaults to the current directory).
+        #[arg(long, default_value = ".")]
+        root: PathBuf,
+    },
 }
 
 #[derive(Copy, Clone, Debug, ValueEnum)]
@@ -194,7 +205,30 @@ fn main() -> Result<()> {
             );
             Ok(())
         }
+        Command::Serve { addr, root } => serve_cmd(addr, root),
     }
+}
+
+/// Run the self-hosted gallery server. Blocks until the process is killed.
+fn serve_cmd(addr: String, root: PathBuf) -> Result<()> {
+    let socket: std::net::SocketAddr = addr
+        .parse()
+        .with_context(|| format!("invalid --addr {addr:?}"))?;
+    let root = if root.is_absolute() {
+        root
+    } else {
+        std::env::current_dir()?.join(root)
+    };
+    let state = std::sync::Arc::new(seed_canvas_server::ServerState::new(&root));
+    let state_for_runtime = state.clone();
+    let rt = tokio::runtime::Runtime::new().context("failed to start tokio runtime")?;
+    eprintln!(
+        "🌱 seed-canvas server starting at http://{addr}/ (workspace: {})",
+        root.display()
+    );
+    rt.block_on(async move { seed_canvas_server::serve(socket, state_for_runtime).await })
+        .context("server error")?;
+    Ok(())
 }
 
 fn init_tracing(verbosity: u8) {

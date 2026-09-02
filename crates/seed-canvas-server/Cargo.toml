@@ -1,9 +1,33 @@
 [package]
 name = "seed-canvas-server"
+description = "Self-hosted HTTP gallery server for seed-canvas, built on axum + tokio."
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
-publish = false
+repository.workspace = true
+homepage.workspace = true
+documentation.workspace = true
+keywords.workspace = true
+categories.workspace = true
 
 [dependencies]
+seed-canvas-core = { workspace = true }
+seed-canvas-adapter-server = { workspace = true }
+seed-canvas-adapter-svg = { workspace = true }
+seed-canvas-storage = { workspace = true }
+galaxy = { workspace = true }
+axum = { workspace = true }
+tokio = { workspace = true }
+tower = { workspace = true }
+tower-http = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+anyhow = { workspace = true }
+thiserror = { workspace = true }
+tracing = { workspace = true }
+hyper = { workspace = true }
+uuid = { workspace = true }
+chrono = { workspace = true }
+sha2 = { workspace = true }
+hex = { workspace = true }

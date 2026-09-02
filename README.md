@@ -14,6 +14,12 @@ Open-source, self-hostable, deterministic generative-art platform — built in R
 
 ![seed-canvas hero artwork](assets/artworks/galaxy-cosmos.png)
 
+**Three built-in templates, three seeds — every image below was rendered by the same binary:**
+
+| `galaxy` / seed `cosmos` | `particles` / seed `aurora` | `mandala` / seed `bloom` |
+| :---: | :---: | :---: |
+| ![galaxy](assets/artworks/galaxy-cosmos.png) | ![particles](assets/artworks/particles-aurora.png) | ![mandala](assets/artworks/mandala-bloom.png) |
+
 </div>
 
 ## What is it?
@@ -68,6 +74,12 @@ seed-canvas init my-gallery && cd my-gallery
 # 5. Verify determinism (same seed → same hash).
 seed-canvas verify --template galaxy --seed cosmos
 # → 3fab6d24ddbd8051…  ✓
+```
+
+Or browse your renders in a browser with the built-in gallery server:
+
+```bash
+seed-canvas serve                  # → http://127.0.0.1:8080
 ```
 
 ## Why?
