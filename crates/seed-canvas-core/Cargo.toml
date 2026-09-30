@@ -24,7 +24,7 @@ tracing = { workspace = true }
 uuid = { workspace = true }
 hex = { workspace = true }
 jsonschema = { workspace = true }
-rand = "0.8"
+rand = "0.10"
 
 [dev-dependencies]
 pretty_assertions = { workspace = true }
